@@ -28,6 +28,18 @@ jobs:
           service_account: 'github-deployer@imaginu-96036.iam.gserviceaccount.com'
           token_format: 'access_token'
 
+      - name: Setup gcloud
+        uses: google-github-actions/setup-gcloud@v2
+
+      - name: Habilita APIs necessárias
+        run: |
+          gcloud services enable \
+            servicemanagement.googleapis.com \
+            servicecontrol.googleapis.com \
+            endpoints.googleapis.com \
+            run.googleapis.com \
+            --project=${{ env.PROJECT_ID }}
+
       - name: Setup Terraform
         uses: hashicorp/setup-terraform@v3
 
