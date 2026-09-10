@@ -1,0 +1,45 @@
+swagger: "2.0"
+info:
+  title: imaginu-api
+  description: API do ecommerce Imaginu
+  version: "1.0.0"
+schemes: [https]
+produces: [application/json]
+consumes: [application/json]
+
+securityDefinitions:
+  firebase:
+    authorizationUrl: ""
+    flow: implicit
+    type: oauth2
+    x-google-issuer: "https://securetoken.google.com/${project_id}"
+    x-google-jwks_uri: "https://www.googleapis.com/service_accounts/v1/metadata/x509/securetoken@system.gserviceaccount.com"
+    x-google-audiences: "${project_id}"
+  api_key:
+    type: apiKey
+    name: x-api-key
+    in: header
+
+paths:
+  /v1/clientes:
+    post:
+      summary: Cadastro de cliente
+      operationId: criarCliente
+      security: []                      # público
+      x-google-backend:
+        address: ${cliente_url}
+        path_translation: APPEND_PATH_TO_ADDRESS
+        jwt_audience: ${cliente_url}
+        deadline: 20.0
+      responses:
+        "201": { description: Criado }
+        "400": { description: Payload invalido }
+    options:                            # preflight CORS
+      operationId: corsClientes
+      security: []
+      x-google-backend:
+        address: ${cliente_url}
+        path_translation: APPEND_PATH_TO_ADDRESS
+        jwt_audience: ${cliente_url}
+      responses:
+        "204": { description: No Content }
