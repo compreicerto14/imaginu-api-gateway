@@ -36,7 +36,7 @@ resource "google_service_account_iam_member" "apigw_agent" {
 resource "google_cloud_run_v2_service_iam_member" "invoker" {
   for_each = toset(["imaginu-cliente"])
   name     = each.value
-  location = local.region
+  location = var.region
   role     = "roles/run.invoker"
   member   = "serviceAccount:${google_service_account.gateway.email}"
 }
@@ -53,8 +53,8 @@ resource "google_api_gateway_api_config" "imaginu" {
 
   openapi_documents {
     document {
-      path = "openapi.yaml"
-      contents = base64encode(templatefile("${path.module}/openapi.yaml.tftpl", {
+      path     = "openapi.yaml"
+      contents = base64encode(templatefile("${path.module}/../openapi.yaml.tftpl", {
         project_id  = var.project_id
         cliente_url = var.client_url
       }))
