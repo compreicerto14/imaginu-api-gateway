@@ -56,7 +56,7 @@ resource "google_api_gateway_api_config" "imaginu" {
       path = "openapi.yaml"
       contents = base64encode(templatefile("${path.module}/openapi.yaml.tftpl", {
         project_id  = var.project_id
-        cliente_url = google_cloud_run_v2_service.cliente.uri
+        cliente_url = var.client_url
       }))
     }
   }
