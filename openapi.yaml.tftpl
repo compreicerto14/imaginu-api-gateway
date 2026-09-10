@@ -28,7 +28,7 @@ paths:
       security: []                      # público
       x-google-backend:
         address: ${cliente_url}
-        path_translation: /v1/clientes
+        path_translation: APPEND_PATH_TO_ADDRESS
         jwt_audience: ${cliente_url}
         deadline: 20.0
       responses:
@@ -39,7 +39,7 @@ paths:
       security: []
       x-google-backend:
         address: ${cliente_url}
-        path_translation: /v1/clientes
+        path_translation: APPEND_PATH_TO_ADDRESS
         jwt_audience: ${cliente_url}
       responses:
         "204": { description: No Content }
