@@ -12,5 +12,5 @@ variable "region" {
 variable "client_url" {
   description = "URL do backend do cliente"
   type        = string
-  default     = "https://imaginu-cliente-dot-imaginu-96036.us-east1.run.app"
+  default     = "https://imaginu-cliente-940298061308.us-east1.run.app"
 }
