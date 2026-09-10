@@ -58,10 +58,18 @@ resource "google_endpoints_service" "imaginu" {
   })
 }
 
+# Habilita o serviço do Endpoints no projeto (sem isso as requisições são recusadas)
+resource "google_project_service" "imaginu_endpoints" {
+  project            = var.project_id
+  service            = google_endpoints_service.imaginu.service_name
+  disable_on_destroy = false
+}
+
 # Serviço Cloud Run com ESPv2 (proxy/gateway)
 resource "google_cloud_run_v2_service" "espv2" {
   name     = "imaginu-endpoints"
   location = var.region
+  deletion_protection = false
 
   template {
     service_account = google_service_account.gateway.email
@@ -81,7 +89,7 @@ resource "google_cloud_run_v2_service" "espv2" {
     }
   }
 
-  depends_on = [google_endpoints_service.imaginu]
+  depends_on = [google_endpoints_service.imaginu, google_project_iam_member.espv2_service_controller, google_project_service.imaginu_endpoints]
 }
 
 # Acesso público ao ESPv2 (ESPv2 valida auth internamente via Endpoints)
