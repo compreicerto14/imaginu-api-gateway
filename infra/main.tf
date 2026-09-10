@@ -73,7 +73,7 @@ resource "google_api_gateway_api_config" "imaginu" {
 
 resource "google_api_gateway_gateway" "imaginu" {
   provider   = google-beta
-  region     = local.region
+  region     = var.region
   gateway_id = "imaginu-gw"
   api_config = google_api_gateway_api_config.imaginu.id
 }
