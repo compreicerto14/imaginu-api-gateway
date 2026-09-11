@@ -81,7 +81,7 @@ jobs:
           [ -n "$cliente_url" ] || { echo "Backend $BACKEND_CLIENTE não encontrado"; exit 1; }
           # Lista explícita: não toca em outros "$" do arquivo (ex.: $ref)
           envsubst '${project_id} ${cliente_url} ${endpoints_service_name}' \
-            < ../../openapi.yaml.tftpl > openapi.yaml
+            < openapi.yaml.tftpl > openapi.yaml
 
       # 2) Publica a config e garante o serviço do Endpoints habilitado
       - name: Publicar service config
