@@ -96,7 +96,7 @@ resource "google_project_iam_member" "espv2_service_controller" {
   project = var.project_id
   role    = "roles/servicemanagement.serviceController"
   member  = "serviceAccount:${google_service_account.gateway.email}"
-}
+} 
 
 # Registra o OpenAPI spec no Cloud Endpoints (Service Management API)
 resource "google_endpoints_service" "imaginu" {
