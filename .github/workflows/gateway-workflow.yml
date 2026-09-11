@@ -9,7 +9,7 @@ env:
   REGION: us-east1
   ESP_RUN_SERVICE: imaginu-endpoints
   BACKEND_CLIENTE: imaginu-cliente
-  ESP_VERSION: "2.29.1"                                  # fixe a versão completa, nunca só "2"
+  ESP_VERSION: "2.55.3"
   ESP_RUNTIME_SA: github-deployer@imaginu-96036.iam.gserviceaccount.com
 
 permissions:
