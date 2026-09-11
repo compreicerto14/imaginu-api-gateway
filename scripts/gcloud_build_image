@@ -71,27 +71,34 @@ fi
 
 # If user did not pass in a custom image, then determine the ESP version.
 if [ -z "${ESP_FULL_VERSION}" ]; then
-  echo "Determining fully-qualified ESP version for tag: ${ESP_TAG}"
+  # If the tag is already a fully-qualified version (x.y.z), use it directly
+  # without querying the registry. This avoids a slow/unreliable network call in CI.
+  if [[ "${ESP_TAG}" =~ ^[0-9]+\.[0-9]+\.[0-9]+$ ]]; then
+    echo "Tag '${ESP_TAG}' is already fully-qualified, skipping registry lookup."
+    ESP_FULL_VERSION="${ESP_TAG}"
+  else
+    echo "Determining fully-qualified ESP version for tag: ${ESP_TAG}"
 
-  ALL_TAGS=$(gcloud container images list-tags "${BASE_IMAGE_NAME}" \
-      --filter="tags~^${ESP_TAG}$" \
-      --format="value(tags)")
-  IFS=',' read -ra TAGS_ARRAY <<< "${ALL_TAGS}"
+    ALL_TAGS=$(gcloud container images list-tags "${BASE_IMAGE_NAME}" \
+        --filter="tags~^${ESP_TAG}$" \
+        --format="value(tags)")
+    IFS=',' read -ra TAGS_ARRAY <<< "${ALL_TAGS}"
 
-  if [ ${#TAGS_ARRAY[@]} -eq 0 ]; then
-    error_exit "Did not find ESP version: ${ESP_TAG}"
-  fi;
+    if [ ${#TAGS_ARRAY[@]} -eq 0 ]; then
+      error_exit "Did not find ESP version: ${ESP_TAG}"
+    fi;
 
-  # Find the tag with the longest length.
-  ESP_FULL_VERSION=""
-  for tag in "${TAGS_ARRAY[@]}"; do
-     if [[ ! "${tag}" =~ ^[0-9] ]]; then
-        continue
-     fi
-     if [ ${#tag} -gt ${#ESP_FULL_VERSION} ]; then
-        ESP_FULL_VERSION=${tag}
-     fi
-  done
+    # Find the tag with the longest length.
+    ESP_FULL_VERSION=""
+    for tag in "${TAGS_ARRAY[@]}"; do
+       if [[ ! "${tag}" =~ ^[0-9] ]]; then
+          continue
+       fi
+       if [ ${#tag} -gt ${#ESP_FULL_VERSION} ]; then
+          ESP_FULL_VERSION=${tag}
+       fi
+    done
+  fi
 fi
 echo "Building image for ESP version: ${ESP_FULL_VERSION}"
 
