@@ -49,6 +49,7 @@ jobs:
   deploy:
     runs-on: ubuntu-latest
     environment: production
+    needs: terraform
     steps:
       - uses: actions/checkout@v4
 
