@@ -7,9 +7,8 @@ on:
 env:
   PROJECT_ID: imaginu-96036
   REGION: us-east1
-  AR_REPO: us-east1-docker.pkg.dev/imaginu-96036/endpoints-esp
-  ESP_RUN_SERVICE: imaginu-api-gateway                          # nome do serviço Cloud Run do proxy
-  ENDPOINTS_SERVICE: imaginu-api.endpoints.imaginu-96036.cloud.goog
+  ESP_RUN_SERVICE: imaginu-endpoints
+  BACKEND_CLIENTE: imaginu-cliente
   ESP_VERSION: "2.29.1"                                  # fixe a versão completa, nunca só "2"
   ESP_RUNTIME_SA: github-deployer@imaginu-96036.iam.gserviceaccount.com
 
