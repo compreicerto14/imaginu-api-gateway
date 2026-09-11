@@ -7,7 +7,11 @@ on:
 env:
   PROJECT_ID: imaginu-96036
   REGION: us-east1
-  ESPV2_VERSION: "2.32.0"
+  AR_REPO: us-east1-docker.pkg.dev/imaginu-96036/endpoints-esp
+  ESP_RUN_SERVICE: imaginu-api-gateway                          # nome do serviço Cloud Run do proxy
+  ENDPOINTS_SERVICE: imaginu-api.endpoints.imaginu-96036.cloud.goog
+  ESP_VERSION: "2.29.1"                                  # fixe a versão completa, nunca só "2"
+  ESP_RUNTIME_SA: github-deployer@imaginu-96036.iam.gserviceaccount.com
 
 permissions:
   contents: read
@@ -41,3 +45,91 @@ jobs:
       - name: Terraform Apply
         working-directory: infra
         run: terraform apply -auto-approve -var="project_id=${{ env.PROJECT_ID }}" -var="region=${{ env.REGION }}" 
+    
+  deploy:
+    runs-on: ubuntu-latest
+    environment: production
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: google-github-actions/auth@v2
+        with:
+          workload_identity_provider: ${{ vars.GCP_WIF_PROVIDER }}
+          service_account: ${{ vars.GCP_CI_SA }}
+
+      - uses: google-github-actions/setup-gcloud@v2
+
+      - name: Variáveis derivadas
+        run: |
+          {
+            echo "ENDPOINTS_SERVICE=imaginu-api.endpoints.${PROJECT_ID}.cloud.goog"
+            echo "AR_REPO=${REGION}-docker.pkg.dev/${PROJECT_ID}/api-gateway"
+            echo "GATEWAY_SA=apigw-imaginu@${PROJECT_ID}.iam.gserviceaccount.com"
+          } >> "$GITHUB_ENV"
+
+      # 1) Renderiza o OpenAPI (substitui o templatefile do Terraform)
+      - name: Renderizar OpenAPI
+        run: |
+          set -euo pipefail
+          export project_id="$PROJECT_ID"
+          export endpoints_service_name="$ENDPOINTS_SERVICE"
+          export cliente_url=$(gcloud run services describe "$BACKEND_CLIENTE" \
+            --region "$REGION" --format='value(status.url)')
+          [ -n "$cliente_url" ] || { echo "Backend $BACKEND_CLIENTE não encontrado"; exit 1; }
+          # Lista explícita: não toca em outros "$" do arquivo (ex.: $ref)
+          envsubst '${project_id} ${cliente_url} ${endpoints_service_name}' \
+            < infra/openapi.yaml.tpl > openapi.yaml
+
+      # 2) Publica a config e garante o serviço do Endpoints habilitado
+      - name: Publicar service config
+        run: |
+          set -euo pipefail
+          gcloud endpoints services deploy openapi.yaml --project "$PROJECT_ID" --quiet
+          CONFIG_ID=$(gcloud endpoints configs list \
+            --service="$ENDPOINTS_SERVICE" --project "$PROJECT_ID" \
+            --limit=1 --format='value(id)')
+          [ -n "$CONFIG_ID" ] || { echo "CONFIG_ID vazio"; exit 1; }
+          echo "CONFIG_ID=$CONFIG_ID" >> "$GITHUB_ENV"
+          echo "IMAGE=${AR_REPO}/endpoints-runtime-serverless:${ESP_VERSION}-${CONFIG_ID}" >> "$GITHUB_ENV"
+          # Idempotente; sem isso o ESPv2 recusa as requisições
+          gcloud services enable "$ENDPOINTS_SERVICE" --project "$PROJECT_ID"
+
+      # 3) Imagem com a config embutida
+      - name: Baixar service config (view=FULL)
+        run: |
+          set -euo pipefail
+          gcloud auth print-access-token \
+            | sed 's/^/Authorization: Bearer /' \
+            | curl --fail --silent --show-error -H @- \
+                -o infra/espv2/service.json \
+                "https://servicemanagement.googleapis.com/v1/services/${ENDPOINTS_SERVICE}/configs/${CONFIG_ID}?view=FULL"
+          test -s infra/espv2/service.json
+
+      - name: Build e push
+        run: |
+          set -euo pipefail
+          gcloud auth configure-docker "${REGION}-docker.pkg.dev" --quiet
+          docker build --build-arg ESP_VERSION="$ESP_VERSION" -t "$IMAGE" infra/espv2
+          docker push "$IMAGE"
+
+      # 4) Deploy completo: a pipeline é dona de TODA a config do serviço
+      - name: Deploy no Cloud Run
+        run: |
+          set -euo pipefail
+          DIGEST=$(gcloud artifacts docker images describe "$IMAGE" \
+            --format='value(image_summary.fully_qualified_digest)')
+          gcloud run deploy "$ESP_RUN_SERVICE" \
+            --image "$DIGEST" \
+            --region "$REGION" \
+            --project "$PROJECT_ID" \
+            --service-account "$GATEWAY_SA" \
+            --allow-unauthenticated \
+            --execution-environment gen1 \
+            --cpu 1 --memory 512Mi \
+            --cpu-boost \
+            --concurrency 500 \
+            --min-instances 0 --max-instances 3 \
+            --set-env-vars "ESPv2_ARGS=--disable_tracing" \
+            --quiet
+          # --set-env-vars substitui TODAS as variáveis: o ENDPOINTS_SERVICE_NAME
+          # antigo sai automaticamente no primeiro deploy
