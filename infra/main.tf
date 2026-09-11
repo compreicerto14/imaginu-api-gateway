@@ -130,7 +130,7 @@ resource "terraform_data" "espv2_image" {
   provisioner "local-exec" {
     interpreter = ["bash", "-c"]
     command     = <<-EOT
-      bash "${path.module}/scripts/gcloud_build_image" \
+      bash "${path.module}/../scripts/gcloud_build_image" \
         -s "${local.endpoints_service_name}" \
         -c "${google_endpoints_service.imaginu.config_id}" \
         -p "${var.project_id}" \
