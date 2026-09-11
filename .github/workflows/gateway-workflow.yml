@@ -40,4 +40,4 @@ jobs:
 
       - name: Terraform Apply
         working-directory: infra
-        run: terraform apply -auto-approve -var="project_id=${{ env.PROJECT_ID }}" -var="region=${{ env.REGION }}"  -var="espv2_version=${{ env.ESPV2_VERSION }}"
+        run: terraform apply -auto-approve -var="project_id=${{ env.PROJECT_ID }}" -var="region=${{ env.REGION }}" 
