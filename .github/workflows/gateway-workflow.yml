@@ -127,7 +127,7 @@ jobs:
             --project "$PROJECT_ID" \
             --service-account "$GATEWAY_SA" \
             --allow-unauthenticated \
-            --execution-environment gen2 \
+            --execution-environment gen1 \
             --cpu 2 --memory 512Mi \
             --cpu-boost \
             --concurrency 500 \
