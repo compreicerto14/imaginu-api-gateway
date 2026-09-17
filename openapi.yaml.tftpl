@@ -44,3 +44,26 @@ paths:
         jwt_audience: ${cliente_url}
       responses:
         "204": { description: No Content }
+  /encomenda/validar:
+    post:
+      summary: Validação de encomenda
+      operationId: validarEncomenda
+      security: []                      # público
+      consumes: [multipart/form-data]
+      x-google-backend:
+        address: ${encomenda_url}
+        path_translation: APPEND_PATH_TO_ADDRESS
+        jwt_audience: ${encomenda_url}
+        deadline: 20.0
+      responses:
+        "200": { description: OK }
+        "400": { description: Payload invalido }
+    options:                            # preflight CORS
+      operationId: corsEncomendaValidar
+      security: []
+      x-google-backend:
+        address: ${encomenda_url}
+        path_translation: APPEND_PATH_TO_ADDRESS
+        jwt_audience: ${encomenda_url}
+      responses:
+        "204": { description: No Content }

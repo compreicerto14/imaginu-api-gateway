@@ -9,6 +9,7 @@ env:
   REGION: us-east1
   ESP_RUN_SERVICE: imaginu-endpoints
   BACKEND_CLIENTE: imaginu-cliente
+  BACKEND_ENCOMENDA: imaginu-encomenda
   ESP_VERSION: "2.56.0"
   ESP_RUNTIME_SA: github-deployer@imaginu-96036.iam.gserviceaccount.com
 
@@ -79,8 +80,11 @@ jobs:
           export cliente_url=$(gcloud run services describe "$BACKEND_CLIENTE" \
             --region "$REGION" --format='value(status.url)')
           [ -n "$cliente_url" ] || { echo "Backend $BACKEND_CLIENTE não encontrado"; exit 1; }
+          export encomenda_url=$(gcloud run services describe "$BACKEND_ENCOMENDA" \
+            --region "$REGION" --format='value(status.url)')
+          [ -n "$encomenda_url" ] || { echo "Backend $BACKEND_ENCOMENDA não encontrado"; exit 1; }
           # Lista explícita: não toca em outros "$" do arquivo (ex.: $ref)
-          envsubst '${project_id} ${cliente_url} ${endpoints_service_name}' \
+          envsubst '${project_id} ${cliente_url} ${encomenda_url} ${endpoints_service_name}' \
             < openapi.yaml.tftpl > openapi.yaml
 
       # 2) Publica a config e garante o serviço do Endpoints habilitado
