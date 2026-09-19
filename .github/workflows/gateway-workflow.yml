@@ -10,6 +10,7 @@ env:
   ESP_RUN_SERVICE: imaginu-endpoints
   BACKEND_CLIENTE: imaginu-cliente
   BACKEND_ENCOMENDA: imaginu-encomenda
+  BACKEND_PEDIDO: imaginu-pedidos
   ESP_VERSION: "2.56.0"
   ESP_RUNTIME_SA: github-deployer@imaginu-96036.iam.gserviceaccount.com
 
@@ -83,7 +84,12 @@ jobs:
           export encomenda_url=$(gcloud run services describe "$BACKEND_ENCOMENDA" \
             --region "$REGION" --format='value(status.url)')
           [ -n "$encomenda_url" ] || { echo "Backend $BACKEND_ENCOMENDA não encontrado"; exit 1; }
+          export pedido_url=$(gcloud run services describe "$BACKEND_PEDIDO" \
+            --region "$REGION" --format='value(status.url)')
+          [ -n "$pedido_url" ] || { echo "Backend $BACKEND_PEDIDO não encontrado"; exit 1; }
           # Lista explícita: não toca em outros "$" do arquivo (ex.: $ref)
+          envsubst '${project_id} ${cliente_url} ${encomenda_url} ${endpoints_service_name}' \
+            < openapi.yaml.tftpl > openapi.yaml
           envsubst '${project_id} ${cliente_url} ${encomenda_url} ${endpoints_service_name}' \
             < openapi.yaml.tftpl > openapi.yaml
 

@@ -67,3 +67,25 @@ paths:
         jwt_audience: ${encomenda_url}
       responses:
         "204": { description: No Content }
+  /v1/pedidos:
+    post:
+      summary: Cadastro de pedido
+      operationId: criarPedido
+      security: []                      # público
+      x-google-backend:
+        address: ${encomenda_url}
+        path_translation: APPEND_PATH_TO_ADDRESS
+        jwt_audience: ${encomenda_url}
+        deadline: 20.0
+      responses:
+        "201": { description: Criado }
+        "400": { description: Payload invalido }
+    options:                            # preflight CORS
+      operationId: corsPedidos
+      security: []
+      x-google-backend:
+        address: ${encomenda_url}
+        path_translation: APPEND_PATH_TO_ADDRESS
+        jwt_audience: ${encomenda_url}
+      responses:
+        "204": { description: No Content }
