@@ -10,7 +10,7 @@ env:
   ESP_RUN_SERVICE: imaginu-endpoints
   BACKEND_CLIENTE: imaginu-cliente
   BACKEND_ENCOMENDA: imaginu-encomenda
-  BACKEND_PEDIDO: imaginu-pedidos
+  BACKEND_PEDIDO: imaginu-pedido
   ESP_VERSION: "2.56.0"
   ESP_RUNTIME_SA: github-deployer@imaginu-96036.iam.gserviceaccount.com
 
