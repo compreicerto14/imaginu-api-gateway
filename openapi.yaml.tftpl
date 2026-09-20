@@ -89,3 +89,27 @@ paths:
         jwt_audience: ${pedido_url}
       responses:
         "204": { description: No Content }
+  /v1/pedidos/pagamento/notificacao:
+    post:
+      summary: Notificação de pagamento
+      operationId: notificacaoPagamento
+      security: []                      # público
+      x-google-backend:
+        address: ${pedido_url}
+        path_translation: APPEND_PATH_TO_ADDRESS
+        jwt_audience: ${pedido_url}
+        deadline: 20.0
+      responses:
+        "201": { description: Criado }
+        "400": { description: Payload invalido }
+    options:                            # preflight CORS
+      operationId: corsPedidos
+      security: []
+      x-google-backend:
+        address: ${pedido_url}
+        path_translation: APPEND_PATH_TO_ADDRESS
+        jwt_audience: ${pedido_url}
+      responses:
+        "204": { description: No Content }
+
+        
