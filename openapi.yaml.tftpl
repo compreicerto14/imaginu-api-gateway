@@ -73,9 +73,9 @@ paths:
       operationId: criarPedido
       security: []                      # público
       x-google-backend:
-        address: ${encomenda_url}
+        address: ${pedido_url}
         path_translation: APPEND_PATH_TO_ADDRESS
-        jwt_audience: ${encomenda_url}
+        jwt_audience: ${pedido_url}
         deadline: 20.0
       responses:
         "201": { description: Criado }
@@ -84,8 +84,8 @@ paths:
       operationId: corsPedidos
       security: []
       x-google-backend:
-        address: ${encomenda_url}
+        address: ${pedido_url}
         path_translation: APPEND_PATH_TO_ADDRESS
-        jwt_audience: ${encomenda_url}
+        jwt_audience: ${pedido_url}
       responses:
         "204": { description: No Content }

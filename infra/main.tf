@@ -52,7 +52,7 @@ data "google_project" "this" {}
 # ESPv2 pode invocar cada backend no Cloud Run
 # (exige que o backend já exista no momento do apply)
 resource "google_cloud_run_v2_service_iam_member" "invoker" {
-  for_each = toset(["imaginu-cliente", "imaginu-encomenda"])
+  for_each = toset(["imaginu-cliente", "imaginu-encomenda", "imaginu-pedido"])
   name     = each.value
   location = var.region
   role     = "roles/run.invoker"

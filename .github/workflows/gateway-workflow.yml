@@ -88,9 +88,7 @@ jobs:
             --region "$REGION" --format='value(status.url)')
           [ -n "$pedido_url" ] || { echo "Backend $BACKEND_PEDIDO não encontrado"; exit 1; }
           # Lista explícita: não toca em outros "$" do arquivo (ex.: $ref)
-          envsubst '${project_id} ${cliente_url} ${encomenda_url} ${endpoints_service_name}' \
-            < openapi.yaml.tftpl > openapi.yaml
-          envsubst '${project_id} ${cliente_url} ${encomenda_url} ${endpoints_service_name}' \
+          envsubst '${project_id} ${cliente_url} ${encomenda_url} ${pedido_url} ${endpoints_service_name}' \
             < openapi.yaml.tftpl > openapi.yaml
 
       # 2) Publica a config e garante o serviço do Endpoints habilitado
