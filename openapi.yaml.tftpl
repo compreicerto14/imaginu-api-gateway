@@ -116,6 +116,7 @@ paths:
       summary: Envia notificação para o Discord
       operationId: discordWebhook
       security: []                      # público
+      consumes: []
       x-google-backend:
         address: ${encomenda_url}
         path_translation: APPEND_PATH_TO_ADDRESS
